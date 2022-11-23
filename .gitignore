@@ -1,0 +1,12 @@
+logs/
+models/
+bird_dataset/
+
+.env/
+.vscode/
+
+*.png
+*.jpeg
+*.jpg
+
+*.pyc

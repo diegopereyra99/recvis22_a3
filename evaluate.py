@@ -12,15 +12,13 @@ parser.add_argument('--data', type=str, default='bird_dataset', metavar='D',
                     help="folder where data is located. test_images/ need to be found in the folder")
 parser.add_argument('--model', type=str, metavar='M',
                     help="the model file to be evaluated. Usually it is of the form model_X.pth")
-parser.add_argument('--outfile', type=str, default='experiment/kaggle.csv', metavar='D',
+parser.add_argument('--outfile', type=str, metavar='D',
                     help="name of the output csv file")
 
 args = parser.parse_args()
 use_cuda = torch.cuda.is_available()
 
-state_dict = torch.load(args.model)
-model = Net()
-model.load_state_dict(state_dict)
+model = torch.load(args.model, map_location=None if use_cuda else torch.device('cpu'))
 model.eval()
 if use_cuda:
     print('Using GPU')
@@ -28,7 +26,7 @@ if use_cuda:
 else:
     print('Using CPU')
 
-from data import data_transforms
+from data import val_transforms
 
 test_dir = args.data + '/test_images/mistery_category'
 
@@ -39,11 +37,17 @@ def pil_loader(path):
             return img.convert('RGB')
 
 
+if args.outfile is None: 
+    args.outfile = os.path.join(os.path.dirname(args.model), "kaggle.csv")
+
+if not os.path.exists(os.path.dirname(args.outfile)):
+    os.makedirs(os.path.dirname(args.outfile))
+
 output_file = open(args.outfile, "w")
 output_file.write("Id,Category\n")
 for f in tqdm(os.listdir(test_dir)):
     if 'jpg' in f:
-        data = data_transforms(pil_loader(test_dir + '/' + f))
+        data = val_transforms(pil_loader(test_dir + '/' + f))
         data = data.view(1, data.size(0), data.size(1), data.size(2))
         if use_cuda:
             data = data.cuda()

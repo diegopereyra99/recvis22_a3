@@ -49,8 +49,8 @@ val_loader = torch.utils.data.DataLoader(
 
 # Neural network and optimizer
 # We define neural net in model.py so that it can be reused by the evaluate.py script
-from model import Net
-model = Net()
+# from model import Net
+# model = Net()
 model = torch.hub.load('pytorch/vision:v0.10.0', args.model, weights="IMAGENET1K_V2")
 model.classifier[-1] = torch.nn.Linear(1280,20)
 # torch.save(model, "/tmp/model_tmp.pth")
@@ -114,11 +114,11 @@ def validation(epoch):
     
     if validation_loss < best_val_loss:
         model_file = "models/" + args.experiment + '/model_min_loss.pth'
-        torch.save(model.state_dict(), model_file)
+        torch.save(model, model_file)
 
     if val_acc > best_val_acc:
         model_file = "models/" + args.experiment + '/model_max_acc.pth'
-        torch.save(model.state_dict(), model_file)
+        torch.save(model, model_file)
     
 for epoch in range(1, args.epochs + 1):
     train(epoch)

@@ -52,7 +52,11 @@ val_loader = torch.utils.data.DataLoader(
 # from model import Net
 # model = Net()
 model = torch.hub.load('pytorch/vision:v0.10.0', args.model, weights="IMAGENET1K_V2")
-model.classifier[-1] = torch.nn.Linear(1280,20)
+if "mobilenet" in args.model:
+    in_feat = model.classifier[-1].in_features
+    model.classifier[-1] = torch.nn.Linear(in_feat, 20)
+elif "resnet" in args.model:
+    model.fc = torch.nn.Linear(model.fc.in_features, 20)
 # torch.save(model, "/tmp/model_tmp.pth")
 # model = torch.load("/tmp/model_tmp.pth")
 

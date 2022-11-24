@@ -5,6 +5,7 @@ from torch import optim
 from torchvision import datasets
 from tqdm import tqdm
 from datetime import datetime
+from torch.optim.lr_scheduler import StepLR
 
 # Training settings
 parser = argparse.ArgumentParser(description='RecVis A3 training script')
@@ -67,6 +68,7 @@ else:
     print('Using CPU')
 
 optimizer = optim.Adam(model.parameters(), lr=args.lr)
+schedule = StepLR(optimizer, step_size=25, gamma=0.2)
 
 from torch.utils.tensorboard import SummaryWriter
 writer = SummaryWriter(log_dir=os.path.join("logs", args.experiment)) 
@@ -90,6 +92,8 @@ def train(epoch):
         
         # train loss estimation
         train_loss = train_loss * 0.3 + loss.data.item() * 0.7
+    
+    schedule.step()
     
     print(f"Train set - Average loss: {train_loss:.5f}")
     writer.add_scalars("Loss", {"train": train_loss}, epoch)
